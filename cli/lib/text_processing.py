@@ -1,15 +1,6 @@
 from string import punctuation
-
+from utils import get_stop_words
 from nltk.stem import PorterStemmer
-
-
-def get_stop_words() -> list[str]:
-    with open(
-        "/home/marcel/Dev/github/ohrelaxo/rag-search-engine/data/stopwords.txt", "r"
-    ) as f:
-        text = f.read()
-        return text.splitlines()
-
 
 def filter_on_stop_words(tokens: list[str]) -> list[str]:
     stop_words = get_stop_words()
@@ -20,7 +11,6 @@ def filter_on_stop_words(tokens: list[str]) -> list[str]:
         new_tokens.append(t)
     return new_tokens
 
-
 def compare(query: list[str], title: list[str]) -> bool:
     stemmer = PorterStemmer()
     for q in query:
@@ -30,7 +20,6 @@ def compare(query: list[str], title: list[str]) -> bool:
             if sq in st:
                 return True
     return False
-
 
 def remove_punctuation(text: str) -> str:
     new_text = ""
@@ -43,7 +32,6 @@ def remove_punctuation(text: str) -> str:
 
 def tokenized_text(text: str) -> list[str]:
     return text.split(" ")
-
 
 def text_processing(text: str) -> list[str]:
     lower_text = text.lower()

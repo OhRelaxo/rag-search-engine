@@ -1,7 +1,6 @@
-import json
+from utils import get_movies
 
 from text_processing import compare, text_processing
-
 
 class Movie:
     def __init__(self, id: int, title: str, description: str) -> None:
@@ -11,7 +10,6 @@ class Movie:
 
     def __repr__(self) -> str:
         return f"{self.id}: {self.title}"
-
 
 class Movies:
     def __init__(self) -> None:
@@ -35,19 +33,18 @@ class Movies:
     def print_search_result(self) -> None:
         for i, v in enumerate(self._movies_list, 1):
             print(f"{i}. {v.title}")
+        return
 
     def sort_by_id(self) -> None:
         self._movies_list = sorted(self._movies_list, key=lambda x: x.id)
+        return
 
     def truncate_by_five(self) -> None:
         self._movies_list = self._movies_list[:5]
-
+        return
 
 def get_search_result(query: str) -> Movies:
-    with open(
-        "/home/marcel/Dev/github/ohrelaxo/rag-search-engine/data/movies.json", "r"
-    ) as f:
-        movies = json.load(f)
+    movies = get_movies()
 
     filtered_query = text_processing(query)
     result = Movies()

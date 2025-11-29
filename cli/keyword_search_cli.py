@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-
-from keyword_search.search import get_search_result
+from lib.tf_idf import InvertedIndex
+from lib.search import get_search_result
 
 
 def main() -> None:
@@ -21,6 +21,12 @@ def main() -> None:
             result.sort_by_id()
             result.truncate_by_five()
             result.print_search_result()
+        case "build":
+            newIndex = InvertedIndex()
+            newIndex.build()
+            newIndex.save()
+            docs = newIndex.get_documents("merida")
+            print(f"First document for token 'merida' = {docs[0]}")
         case _:
             parser.print_help()
 

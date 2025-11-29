@@ -1,0 +1,26 @@
+import json
+import os
+import pickle
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "movies.json")
+STOPWORDS_PATH = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
+CACHE_PATH = os.path.join(PROJECT_ROOT, "cache")
+INDEX_PATH = os.path.join(CACHE_PATH, "index.pkl")
+DOCMAP_PATH = os.path.join(CACHE_PATH, "docmap.pkl")
+
+def get_movies():
+    with open(DATA_PATH, "r") as f:
+        movies = json.load(f)
+    return movies
+
+def get_stop_words() -> list[str]:
+    with open(STOPWORDS_PATH, "r") as f:
+        text = f.read()
+        return text.splitlines()
+
+def save_obj(obj: dict, path: str) -> None:
+    with open(path, "wb") as f:
+        pickler = pickle.Pickler(f)
+        pickler.dump(obj)
+    return
