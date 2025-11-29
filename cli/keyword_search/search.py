@@ -1,5 +1,7 @@
 import json
 
+from text_processing import compare, text_processing
+
 
 class Movie:
     def __init__(self, id: int, title: str, description: str) -> None:
@@ -42,16 +44,16 @@ class Movies:
 
 
 def get_search_result(query: str) -> Movies:
-    movies_file = open(
+    with open(
         "/home/marcel/Dev/github/ohrelaxo/rag-search-engine/data/movies.json", "r"
-    )
-    movies = json.load(movies_file)
-    movies_file.close()
+    ) as f:
+        movies = json.load(f)
 
+    filtered_query = text_processing(query)
     result = Movies()
     for v in movies["movies"]:
-        title = v["title"]
-        if query in title:
+        title = text_processing(v["title"])
+        if compare(filtered_query, title):
             result.append(Movie(v["id"], v["title"], v["description"]))
 
     return result
