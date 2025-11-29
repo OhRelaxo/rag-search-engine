@@ -18,9 +18,3 @@ def get_stop_words() -> list[str]:
     with open(STOPWORDS_PATH, "r") as f:
         text = f.read()
         return text.splitlines()
-
-def save_obj(obj: dict, path: str) -> None:
-    with open(path, "wb") as f:
-        pickler = pickle.Pickler(f)
-        pickler.dump(obj)
-    return

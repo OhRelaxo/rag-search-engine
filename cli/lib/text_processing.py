@@ -1,5 +1,5 @@
 from string import punctuation
-from utils import get_stop_words
+from .utils import get_stop_words
 from nltk.stem import PorterStemmer
 
 def filter_on_stop_words(tokens: list[str]) -> list[str]:

@@ -1,6 +1,5 @@
-from utils import get_movies
-
-from text_processing import compare, text_processing
+from .utils import get_movies
+from .text_processing import compare, text_processing
 
 class Movie:
     def __init__(self, id: int, title: str, description: str) -> None:
