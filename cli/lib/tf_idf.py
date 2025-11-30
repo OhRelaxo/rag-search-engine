@@ -1,29 +1,38 @@
 import pickle
 from .text_processing import text_processing
 from .utils import get_movies, CACHE_PATH
-from collections import defaultdict
+from collections import defaultdict, Counter
 import os
 
 class InvertedIndex:
     def __init__(self):
         self.index: dict[str, set[int]] = defaultdict(set)
-        self.docmap: dict[int, dict] = {}
+        self.docmap: dict[int, dict[int, str]] = {}
+        self.term_frequencies: dict[int, Counter] = defaultdict(Counter)
         self.index_path = os.path.join(CACHE_PATH, "index.pkl")
         self.docmap_path = os.path.join(CACHE_PATH, "docmap.pkl")
+        self.term_frequencies_path = os.path.join(CACHE_PATH, "term_frequencies.pkl")
 
     def __add_document(self, doc_id: int, text: str) -> None:
         tokens = text_processing(text)
         for token in tokens:
             self.index[token].add(doc_id)
+            self.term_frequencies[doc_id][token] += 1
         return
 
     def get_documents(self, term: str) -> list[int]:
         doc_ids = self.index.get(term, set())
         return sorted(list(doc_ids))
 
-    def get_movie(self, doc_id: int):
+    def get_movie(self, doc_id: int) -> dict[int, str]:
         movie = self.docmap[doc_id]
         return movie
+
+    def get_tf(self, doc_id: int, term: str) -> int:
+        token = text_processing(term)
+        if len(token) > 1:
+            raise Exception("error in class InvertedIndex at method get_tf: too many tokens, can only process one token!")
+        return self.term_frequencies[doc_id][token[0]]
 
     def build(self) -> None:
         movies = get_movies()
@@ -40,6 +49,8 @@ class InvertedIndex:
             pickle.dump(self.index, f)
         with open(self.docmap_path, "wb") as f:
             pickle.dump(self.docmap, f)
+        with open(self.term_frequencies_path, "wb") as f:
+            pickle.dump(self.term_frequencies, f)
         return
 
     def load(self) -> None:
@@ -58,4 +69,12 @@ class InvertedIndex:
             print("No file with the name docmap.pkl was found in the cache directory")
         except Exception as e:
             print(f"error while opening the docmap.pkl file: {e}")
+
+        try:
+            with open(self.term_frequencies_path, "rb") as f:
+                self.term_frequencies = pickle.load(f)
+        except FileNotFoundError:
+            print("No file with the name term_frequencies.pkl was found in the cache directory")
+        except Exception as e:
+            print(f"error while opening the term_frequencies.pkl file: {e}")
         return
