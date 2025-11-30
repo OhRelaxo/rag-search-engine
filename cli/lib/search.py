@@ -1,4 +1,4 @@
-from .tf_idf import InvertedIndex
+from .inverted_index import InvertedIndex
 from .text_processing import text_processing
 
 
@@ -8,9 +8,7 @@ def print_search_result(movie_list) -> None:
     return
 
 def get_search_result(query: str, index: InvertedIndex):
-    index.load()
     tokens = text_processing(query)
-
     result = []
     seen_ids = []
     for token in tokens:

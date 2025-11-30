@@ -1,8 +1,9 @@
 import pickle
+import os
+from collections import defaultdict, Counter
+
 from .text_processing import text_processing
 from .utils import get_movies, CACHE_PATH
-from collections import defaultdict, Counter
-import os
 
 class InvertedIndex:
     def __init__(self):
@@ -36,10 +37,10 @@ class InvertedIndex:
 
     def build(self) -> None:
         movies = get_movies()
-        for v in movies["movies"]:
-            doc_id = v["id"]
-            doc_description = f"{v['title']} {v['description']}"
-            self.docmap[doc_id] = v
+        for movie in movies["movies"]:
+            doc_id = movie["id"]
+            doc_description = f"{movie['title']} {movie['description']}"
+            self.docmap[doc_id] = movie
             self.__add_document(doc_id, doc_description)
         return
 
