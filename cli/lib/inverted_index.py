@@ -4,7 +4,7 @@ from collections import defaultdict, Counter
 import math
 
 from .text_processing import text_processing
-from .utils import get_movies, CACHE_PATH
+from .utils import get_movies, CACHE_PATH, BM25_K1
 
 class InvertedIndex:
     def __init__(self):
@@ -37,10 +37,26 @@ class InvertedIndex:
         return self.term_frequencies[doc_id][token[0]]
 
     def get_idf(self, term: str) -> float:
-        processed_term = text_processing(term)
+        token = text_processing(term)
+        if len(token) > 1:
+            raise Exception("error in class InvertedIndex at method get_bm25_id: too many tokens, can only process one token!")
         doc_count = len(self.docmap)
-        term_doc_count = len(self.index.get(processed_term[0], set()))
+        term_doc_count = len(self.index.get(token[0], set()))
         return math.log((doc_count + 1) / (term_doc_count + 1))
+
+    def get_bm25_idf(self, term: str) -> float:
+        # log((N - df + 0.5) / (df + 0.5) + 1)
+        token = text_processing(term)
+        if len(token) > 1:
+            raise Exception("error in class InvertedIndex at method get_bm25_id: too many tokens, can only process one token!")
+        doc_count = len(self.docmap)
+        term_doc_count = len(self.index.get(token[0], set()))
+        return math.log((doc_count - term_doc_count + 0.5) / (term_doc_count + 0.5) + 1)
+
+    def get_bm25_tf(self, doc_id, term, k1 = BM25_K1) -> float:
+        tf = self.get_tf(doc_id, term)
+        bm25_tf = (tf * (k1 + 1) / (tf + k1))
+        return bm25_tf
 
     def build(self) -> None:
         movies = get_movies()
