@@ -1,6 +1,7 @@
 import pickle
 import os
 from collections import defaultdict, Counter
+import math
 
 from .text_processing import text_processing
 from .utils import get_movies, CACHE_PATH
@@ -34,6 +35,12 @@ class InvertedIndex:
         if len(token) > 1:
             raise Exception("error in class InvertedIndex at method get_tf: too many tokens, can only process one token!")
         return self.term_frequencies[doc_id][token[0]]
+
+    def get_idf(self, term: str) -> float:
+        processed_term = text_processing(term)
+        doc_count = len(self.docmap)
+        term_doc_count = len(self.index.get(processed_term[0], set()))
+        return math.log((doc_count + 1) / (term_doc_count + 1))
 
     def build(self) -> None:
         movies = get_movies()
