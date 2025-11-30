@@ -1,55 +1,28 @@
-from .utils import get_movies
-from .text_processing import compare, text_processing
+from .tf_idf import InvertedIndex
+from .text_processing import text_processing
 
-class Movie:
-    def __init__(self, id: int, title: str, description: str) -> None:
-        self.id = id
-        self.title = title
-        self.description = description
 
-    def __repr__(self) -> str:
-        return f"{self.id}: {self.title}"
+def print_search_result(movie_list) -> None:
+    for i, v in enumerate(movie_list, 1):
+        print(f"{i}. {v["title"]}, id: {v["id"]}")
+    return
 
-class Movies:
-    def __init__(self) -> None:
-        self._movies_list: list[Movie] = []
+def get_search_result(query: str, index: InvertedIndex):
+    index.load()
+    tokens = text_processing(query)
 
-    def append(self, movie: Movie) -> None:
-        self._movies_list.append(movie)
-
-    def __getitem__(self, index: int) -> Movie:
-        return self._movies_list[index]
-
-    def __setitem__(self, index: int, value: Movie) -> None:
-        self._movies_list[index] = value
-
-    def __len__(self) -> int:
-        return len(self._movies_list)
-
-    def __repr__(self) -> str:
-        return f"{self._movies_list}"
-
-    def print_search_result(self) -> None:
-        for i, v in enumerate(self._movies_list, 1):
-            print(f"{i}. {v.title}")
-        return
-
-    def sort_by_id(self) -> None:
-        self._movies_list = sorted(self._movies_list, key=lambda x: x.id)
-        return
-
-    def truncate_by_five(self) -> None:
-        self._movies_list = self._movies_list[:5]
-        return
-
-def get_search_result(query: str) -> Movies:
-    movies = get_movies()
-
-    filtered_query = text_processing(query)
-    result = Movies()
-    for v in movies["movies"]:
-        title = text_processing(v["title"])
-        if compare(filtered_query, title):
-            result.append(Movie(v["id"], v["title"], v["description"]))
-
+    result = []
+    seen_ids = []
+    for token in tokens:
+        doc_ids: list[int] = index.get_documents(token)
+        for doc_id in doc_ids:
+            if len(result) >= 5:
+                break
+            if doc_id in seen_ids:
+                continue
+            movie = index.get_movie(doc_id)
+            result.append(movie)
+            seen_ids.append(doc_id)
+        if len(result) >= 5:
+            break
     return result

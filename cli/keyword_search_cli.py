@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-
 import argparse
+from lib.search import print_search_result
 from lib.tf_idf import InvertedIndex
 from lib.search import get_search_result
 
@@ -16,19 +15,15 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    index = InvertedIndex()
     match args.command:
         case "search":
             print(f"Searching for: {args.query}")
-            result = get_search_result(args.query)
-            result.sort_by_id()
-            result.truncate_by_five()
-            result.print_search_result()
+            result = get_search_result(args.query, index)
+            print_search_result(result)
         case "build":
-            newIndex = InvertedIndex()
-            newIndex.build()
-            newIndex.save()
-            docs = newIndex.get_documents("merida")
-            print(f"First document for token 'merida' = {docs[0]}")
+            index.build()
+            index.save()
         case _:
             parser.print_help()
 
