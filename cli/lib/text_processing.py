@@ -21,6 +21,6 @@ def text_processing(text: str) -> list[str]:
 
     stemmer = PorterStemmer()
     stemmed_tokens = []
-    for word in tokens:
+    for word in filtered_tokens:
         stemmed_tokens.append(stemmer.stem(word))
     return stemmed_tokens
