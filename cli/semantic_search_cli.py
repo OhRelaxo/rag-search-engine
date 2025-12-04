@@ -22,6 +22,10 @@ def main():
     search_parser.add_argument("query", type=str, help="Search query")
     search_parser.add_argument("--limit", type=int, default=5, required=False, help="optional parameter to specify search limit, default is 5")
 
+    chunk_parser = subparsers.add_parser("chunk", help="Chunks the given text for more accurate search")
+    chunk_parser.add_argument("text", type=str, help="the text to chunk")
+    chunk_parser.add_argument("--chunk-size", type=int, default=200, help="the character size per chunk, the default value is 200")
+
     args = parser.parse_args()
 
     match args.command:
@@ -40,6 +44,17 @@ def main():
             result = model.search(args.query, args.limit)
             for i, movie in enumerate(result, 1):
                 print(f"{i}. {movie["title"]} (score: {movie["score"]:.4f})\n{movie["description"]}")
+        case "chunk":
+            parts = args.text.split()
+            print(f"Chunking {len(args.text)} characters")
+            i = 1
+            while len(parts) > 0:
+                part = parts[:args.chunk_size]
+                text = " ".join(part)
+                print(f"{i}. " + text)
+                parts = parts[args.chunk_size:]
+                i += 1
+            return
         case _:
             parser.print_help()
 
