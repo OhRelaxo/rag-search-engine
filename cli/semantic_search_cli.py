@@ -22,9 +22,10 @@ def main():
     search_parser.add_argument("query", type=str, help="Search query")
     search_parser.add_argument("--limit", type=int, default=5, required=False, help="optional parameter to specify search limit, default is 5")
 
-    chunk_parser = subparsers.add_parser("chunk", help="Chunks the given text for more accurate search")
+    chunk_parser = subparsers.add_parser("chunk", help="Split text into fixed-size chunks with optional overlap")
     chunk_parser.add_argument("text", type=str, help="the text to chunk")
     chunk_parser.add_argument("--chunk-size", type=int, default=200, help="the character size per chunk, the default value is 200")
+    chunk_parser.add_argument("--overlap", type=int, default=0, help="Number of words to overlap between chunks, the default value is 0" )
 
     args = parser.parse_args()
 
@@ -48,12 +49,14 @@ def main():
             parts = args.text.split()
             print(f"Chunking {len(args.text)} characters")
             i = 1
-            while len(parts) > 0:
+            word_count = len(parts)
+            while word_count > 0:
                 part = parts[:args.chunk_size]
                 text = " ".join(part)
                 print(f"{i}. " + text)
-                parts = parts[args.chunk_size:]
+                parts = parts[args.chunk_size - args.overlap:]
                 i += 1
+                word_count -= args.chunk_size
             return
         case _:
             parser.print_help()
