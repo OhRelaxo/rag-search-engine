@@ -185,30 +185,49 @@ def semantic_search(query: str, limit: int) -> None:
         )
     return
 
-def chunk(text: str, chunk_size: int, overlap: int) -> list[str]:
-    parts = text.split()
+def fixed_size_chunking(text: str, chunk_size: int, overlap: int) -> list[str]:
+    words = text.split()
+    chunks = []
+
+    n_words = len(words)
+    i = 0
+    while i < n_words:
+        chunk_words = words[i : i + chunk_size]
+        if chunks and len(chunk_words) <= overlap:
+            break
+
+        chunks.append(" ".join(chunk_words))
+        i += chunk_size - overlap
+
+    return chunks
+
+
+def chunk_text(text: str, chunk_size: int, overlap: int) -> None:
+    chunks = fixed_size_chunking(text, chunk_size, overlap)
     print(f"Chunking {len(text)} characters")
-    return chunking(parts, chunk_size, overlap)
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
+
 
 def semantic_chunk(text: str, max_chunk_size: int, overlap: int) -> list[str]:
-    parts = re.split(r"(?<=[.!?])\s+", text)
-    print(f"Semantically chunking {len(text)} characters")
-    return chunking(parts, max_chunk_size, overlap)
-
-def chunking(parts: list[str], chunk_size: int, overlap: int) -> list[str]:
-    i = 1
-    chunks: list[str] = []
-    print("num sentences:", len(parts))
-    print(parts[:8])
-    while len(parts) >= 1:
-        part = parts[:chunk_size]
-        text = " ".join(part)
-        print("this chunk has", len(part), "sentences")
-        chunks.append(text)
-        print(f"{i}. {text}")
-        parts = parts[chunk_size - overlap:]
-        i += 1
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    chunks = []
+    i = 0
+    n_sentences = len(sentences)
+    while i < n_sentences:
+        chunk_sentences = sentences[i : i + max_chunk_size]
+        if chunks and len(chunk_sentences) <= overlap:
+            break
+        chunks.append(" ".join(chunk_sentences))
+        i += max_chunk_size - overlap
     return chunks
+
+
+def semantic_chunk_text(text: str, max_chunk_size: int, overlap: int) -> None:
+    chunks = semantic_chunk(text, max_chunk_size, overlap)
+    print(f"Semantically chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
 
 def embed_chunks() -> None:
     movies = utils.get_movies()
