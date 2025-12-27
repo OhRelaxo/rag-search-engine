@@ -1,8 +1,6 @@
 import argparse
 
-from lib.semantic_search import SemanticSearch
-from lib.utils import get_movies
-from lib.semantic_search import verify_model, embed_text, verify_embeddings, embed_query_text
+from lib.semantic_search import verify_model, embed_text, verify_embeddings, embed_query_text, semantic_search, chunk, semantic_chunk
 
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
@@ -27,6 +25,11 @@ def main():
     chunk_parser.add_argument("--chunk-size", type=int, default=200, help="the character size per chunk, the default value is 200")
     chunk_parser.add_argument("--overlap", type=int, default=0, help="Number of words to overlap between chunks, the default value is 0" )
 
+    semantic_chunk_parser = subparsers.add_parser("semantic_chunk", help="Split text on sentence boundaries to preserve meaning")
+    semantic_chunk_parser.add_argument("text", type=str, help="the text to chunk")
+    semantic_chunk_parser.add_argument("--max-chunk-size", type=int, default=4, help="the maximum size per chunk, the default value is 4")
+    semantic_chunk_parser.add_argument("--overlap", type=int, default=0, help="Number of words to overlap between chunks, the default value is 0")
+
     args = parser.parse_args()
 
     match args.command:
@@ -39,25 +42,11 @@ def main():
         case "embedquery":
             embed_query_text(args.query)
         case "search":
-            model = SemanticSearch()
-            movies = get_movies()
-            model.load_or_create_embeddings(movies["movies"])
-            result = model.search(args.query, args.limit)
-            for i, movie in enumerate(result, 1):
-                print(f"{i}. {movie["title"]} (score: {movie["score"]:.4f})\n{movie["description"]}")
+            semantic_search(args.query, args.limit)
         case "chunk":
-            parts = args.text.split()
-            print(f"Chunking {len(args.text)} characters")
-            i = 1
-            word_count = len(parts)
-            while word_count > 0:
-                part = parts[:args.chunk_size]
-                text = " ".join(part)
-                print(f"{i}. " + text)
-                parts = parts[args.chunk_size - args.overlap:]
-                i += 1
-                word_count -= args.chunk_size
-            return
+            chunk(args.text, args.chunk_size, args.overlap)
+        case "semantic_chunk":
+            semantic_chunk(args.text, args.max_chunk_size, args.overlap)
         case _:
             parser.print_help()
 

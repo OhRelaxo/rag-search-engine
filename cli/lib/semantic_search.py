@@ -1,4 +1,5 @@
 import os.path
+import re
 
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -132,4 +133,26 @@ def semantic_search(query: str, limit: int) -> None:
             f"{i}. {movie["title"]} (score: {movie["score"]:.4f})\n"
             f"{movie["description"][:100]}...\n"
         )
+    return
+
+def chunk(text: str, chunk_size: int, overlap: int) -> None:
+    parts = text.split()
+    print(f"Chunking {len(text)} characters")
+    chunking(parts, chunk_size, overlap)
+    return
+
+def semantic_chunk(text: str, max_chunk_size: int, overlap: int) -> None:
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    print(f"Semantically chunking {len(text)} characters")
+    chunking(parts, max_chunk_size, overlap)
+    return
+
+def chunking(parts: list[str], chunk_size: int, overlap: int) -> None:
+    i = 1
+    while len(parts) >= 1:
+        part = parts[:chunk_size]
+        text = " ".join(part)
+        print(f"{i}. {text}")
+        parts = parts[chunk_size - overlap:]
+        i += 1
     return
