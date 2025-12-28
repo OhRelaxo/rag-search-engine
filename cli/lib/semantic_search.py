@@ -17,7 +17,7 @@ class SemanticSearch:
 
         self.movie_embeddings_path = os.path.join(CACHE_PATH, "movie_embeddings.npy")
     
-    def generate_embedding(self, text: str):
+    def generate_embedding(self, text: str) -> np.ndarray:
         if not text or text.isspace():
             raise ValueError("error in class SemanticSearch in method generate_embedding: text is either empty or just whitespace!")
         return self.model.encode([text])[0]
@@ -128,6 +128,36 @@ class ChunkedSemanticSearch(SemanticSearch):
 
         return self.build_chunk_embeddings(documents)
 
+    def search_chunks(self, query: str, limit: int = 10) -> list[dict]:
+        embeddings = self.generate_embedding(query)
+        chunk_score: list[dict] = []
+
+        # cosine_similarity = dot_product(A, B) / (magnitude(A) × magnitude(B))
+        for i, chunk_embedding in enumerate(self.chunk_embeddings):
+            similarity = cosine_similarity(embeddings, chunk_embedding)
+            metadata = self.chunk_metadata[i]
+            chunk_score.append({"chunk_idx": i, "movie_idx": metadata["movie_idx"], "score": similarity})
+
+        movie_score = {} # movie_idx: cosine_similarity
+        for c_score in chunk_score:
+            if movie_score.get(c_score["movie_idx"]) is None or c_score["score"] > movie_score.get(c_score["movie_idx"]):
+                movie_score[c_score["movie_idx"]] = c_score["score"]
+
+        sorted_movie_score = sorted(movie_score.items(), key=lambda items: items[1], reverse=True)
+        sorted_movie_score = sorted_movie_score[:limit]
+        print(sorted_movie_score)
+        result: list[dict] = []
+
+        for s in sorted_movie_score:
+            doc = self.documents[s[0]]
+            doc_id = doc["id"]
+            title = doc["title"]
+            document = doc["description"]
+            score = s[1]
+            metadata = self.chunk_metadata[s[0]]
+            result.append({"id": doc_id, "title": title, "document": document[:100], "score": score, "metadata": metadata})
+        return result
+
 def verify_model() -> None:
     model = SemanticSearch()
     print(f"Model loaded: {model.model}")
@@ -234,4 +264,14 @@ def embed_chunks() -> None:
     search = ChunkedSemanticSearch()
     embeddings = search.load_or_create_chunk_embeddings(movies["movies"])
     print(f"Generated {len(embeddings)} chunked embeddings")
+    return
+
+def search_chunked(query: str, limit: int):
+    movies = utils.get_movies()
+    search = ChunkedSemanticSearch()
+    search.load_or_create_chunk_embeddings(movies["movies"])
+    result = search.search_chunks(query, limit)
+    for i, r in enumerate(result, 1):
+        print(f"\n{i}. {r["title"]} (score: {r["score"]:.4f})")
+        print(f"   {r["document"]}...")
     return
