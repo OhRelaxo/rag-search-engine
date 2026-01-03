@@ -3,7 +3,7 @@ import os
 from collections import defaultdict, Counter
 import math
 
-from .text_processing import text_processing
+from .keyword_search import text_processing
 from .utils import get_movies, CACHE_PATH, BM25_K1, BM25_B
 
 class InvertedIndex:
