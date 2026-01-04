@@ -1,7 +1,4 @@
-from string import punctuation
-from nltk.stem import PorterStemmer
-from .inverted_index import InvertedIndex
-from .utils import get_stop_words
+from .inverted_index import InvertedIndex, text_processing
 
 
 def print_search_result(movie_list) -> None:
@@ -75,25 +72,3 @@ def command_bm25search(query: str, index: InvertedIndex) -> None:
         title = movie["title"]
         print(f"{i}. ({doc_id}) {title} - Score: {score:.2f}")
     return
-
-def text_processing(text: str) -> list[str]:
-    text = text.lower()
-    text = text.translate(str.maketrans("", "", punctuation))
-
-    tokens = text.split()
-    valid_tokens = []
-    for token in tokens:
-        if token:
-            valid_tokens.append(token)
-
-    stop_words = get_stop_words()
-    filtered_tokens = []
-    for token in valid_tokens:
-        if token not in stop_words:
-            filtered_tokens.append(token)
-
-    stemmer = PorterStemmer()
-    stemmed_tokens = []
-    for word in filtered_tokens:
-        stemmed_tokens.append(stemmer.stem(word))
-    return stemmed_tokens
