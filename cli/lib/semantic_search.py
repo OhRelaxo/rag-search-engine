@@ -145,7 +145,6 @@ class ChunkedSemanticSearch(SemanticSearch):
 
         sorted_movie_score = sorted(movie_score.items(), key=lambda items: items[1], reverse=True)
         sorted_movie_score = sorted_movie_score[:limit]
-        print(sorted_movie_score)
         result: list[dict] = []
 
         for s in sorted_movie_score:
