@@ -18,6 +18,7 @@ def main() -> None:
     rrf_search_parser.add_argument("query", type=str, help="the query to search for")
     rrf_search_parser.add_argument("-k", type=int, default=60, help="on optional parameter to set the k parameter, the default is 60")
     rrf_search_parser.add_argument("--limit", type=int, default=5, help="an optional parameter to set the limit of the output")
+    rrf_search_parser.add_argument("--enhance", type=str, choices=["spell"], help="Query enhancement method")
 
     args = parser.parse_args()
 
@@ -35,7 +36,7 @@ def main() -> None:
                     print(f"BM25: {data["keyword_score"]:.3f}, Semantic: {data["semantic_score"]:.3f}")
                     print(f"{data["document"]}...")
         case "rrf-search":
-            result = rrf_search(args.query, args.k, args.limit)
+            result = rrf_search(args.query, args.k, args.limit, args.enhance)
             for i, (doc_id, data) in enumerate(result, 1):
                 bm25_rank = data.get("bm25_rank")
                 semantic_rank = data.get("semantic_rank")
