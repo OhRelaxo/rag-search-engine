@@ -4,7 +4,7 @@ from typing import Any
 from .keyword_search import InvertedIndex
 from .semantic_search import ChunkedSemanticSearch
 from .utils import get_movies
-from .gemini import spell_correct
+from .gemini import spell_correct, rewrite_query
 
 
 class HybridSearch:
@@ -128,11 +128,16 @@ def rrf_search(query: str, k: int, limit: int, enhancement: str) -> list[tuple[A
     documents = get_movies()
     search = HybridSearch(documents["movies"])
 
+    enhanced_query = ""
+
     match enhancement:
         case "spell":
             enhanced_query = spell_correct(query)
-            if enhanced_query != query:
-                print(f"Enhanced query ({enhancement}): '{query}' -> '{enhanced_query}'\n")
+        case "rewrite":
+            enhanced_query = rewrite_query(query)
+
+    if enhanced_query != query:
+        print(f"Enhanced query ({enhancement}): '{query}' -> '{enhanced_query}'\n")
 
     result = search.rrf_search(query, k)
     return result[:limit]
